@@ -1,0 +1,35 @@
+import requests
+import json
+# from pprint import pprint
+
+# Посмотреть документацию к API GitHub, разобраться как вывести список
+# репозиториев для конкретного пользователя, сохранить JSON-вывод в файле
+# *.json.
+
+def get_github_repos(username, token = None):
+    if token is None:
+        # без аутентификации, открытые репозитории
+        url = f"https://api.github.com/users/{username}/repos"
+        repositories = requests.get(url)
+    else:
+        # с аутентификацией
+        # не получилось :(
+        # В интернете написали, правда, в 2013м году,
+        # https://stackoverflow.com/questions/17622439/how-to-use-github-api-token-in-python-for-requesting
+        # Что нужно отправить post запрос, после чего для авторизованного
+        # пользователя можно получить список репозиториев, однако вместо
+        # этого ответ приходит в виде
+        # {'documentation_url': 'https://docs.github.com/rest', 'message': 'Not Found'}
+        authorize_github(token)
+        url = f'https://api.github.com/{username}/repos'
+        repositories = requests.get(url)
+    
+    with open(f'{username} repos.json', 'w') as outfile:
+        json.dump(repositories.json(), outfile)
+    return repositories.json()
+
+
+def authorize_github(token):
+    headers = {'Authorization': f'token {token}'}
+    url = 'https://api.github.com/search/repositories?q=github+api'
+    auth_request = requests.post(url, headers=headers)
